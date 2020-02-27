@@ -1,0 +1,3 @@
+runtime: python37
+instance_class: F4
+entrypoint: gunicorn main:app -w 4 -k uvicorn.workers.UvicornWorker
