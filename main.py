@@ -1,11 +1,9 @@
 """
-This API takes a text input and analyzes it for toxic, obscene, threataning, insulting, 
-and hate speach. Later versions will include a more accurate model and the ability to detect
-suicidality. 
+Main  
 """
 import re
 import string
-from fastapi import BaseModel, FastAPI
+from fastapi import FastAPI
 import sklearn
 from sklearn.externals import joblib
 
@@ -19,8 +17,97 @@ app = FastAPI()
 @app.post("/predict/{text}")
 async def predict(text: str):
     """
-    This is the enpoint function that reads in the text and uses unpickled model to 
-    make predictions.
+    This API accepts string requests and cleans the text. 
+    
+    The following are removed:
+    - Newline characters 
+    - Return characters
+    - Leading and trailing white spaces
+    - Usernames if indicated with the term 'User'
+    - IP addresses and user IDs
+    - Non-printable characters e.g. unicode
+
+    **Model**: Term frequency-inverse document frequency(Tfidf) and Logistic Regression
+    
+    
+    The model is used to determine if the text contains toxic or offensive content. 
+    The possible labels are toxic, severe toxic, obscene, threat, insult, and identity 
+    hate. If no toxic or obscene content is detected the result will be, "No toxic or 
+    offensive content detected." 
+
+    The API returns the original text, any classifications that apply, and the predicted 
+    probability of the labels given.
+
+    The current model is for testing purposes only, and will be replaced by a more robust natural language processing
+    model that has a higher positive recall score for each class.
+
+    
+    |**Toxic**      |precision    |recall  |f1-score   |support|
+    |----------:|-------:|-------:|-------:|-------:|
+    | negative   | 0.97    | 0.99    | 0.98    | 28927   |
+    |  positive    |  0.85   |   0.68  |    0.75 | 2988    |
+    |**accuracy**|         |         | 0.96    | 31915   |
+    |**macro avg**|    0.91 |   0.83  |    0.86 |   31915 |
+    |**weighted avg**|    0.96 |   0.96  |    0.96 |   31915 |
+
+    --------
+
+
+    |**Severe Toxic**|precision    |recall  |f1-score   |support|
+    |----------:|-------:|-------:|-------:|-------:|
+    | negative      |  0.99   |  1.00    | 1.00   | 31612   |
+    |    positive        |0.53     |0.29     |0.38     |  303  |
+    |**accuracy**|         |         | 0.99    | 31915   |
+    |**macro avg**|    0.76 |   0.65  |    0.69 |   31915 |
+    |**weighted avg**|    0.99 |   0.99 |    0.99|   31915 |
+
+    --------
+
+
+    |**Obscene**   |precision    |recall  |f1-score   |support|
+    |:----------:|:-------:|:-------:|:-------:|:-------:|
+    | negative     |  0.98   |  0.99      | 0.99     | 30291  |
+    |   positive      |0.88     |0.71      |0.79     |  1624 |
+    |**accuracy**|         |         | 0.98    | 31915   |
+    |**macro avg**|    0.93 |   0.85  |    0.89 |   31915 |
+    |**weighted avg**|    0.98 |   0.98 |    0.98|   31915 |
+
+
+    --------
+
+
+    |**Threat**    |precision    |recall  |f1-score   |support|
+    |:----------:|:-------:|:-------:|:-------:|:-------:|
+    | negative     | 1.00    | 1.00   | 1.00    | 31825   |
+    |    positive       |  0.63   |   0.27  |    0.38 | 90    |
+    |**accuracy**|         |         | 0.96    | 31915   |
+    |**macro avg**|    0.81 |   0.63  |    0.69 |   31915 |
+    |**weighted avg**|    1.00 |   1.00 |    1.00 |   31915 |
+
+
+    --------
+
+
+    |**Insult**  |precision    |recall  |f1-score   |support|
+    |:----------:|:-------:|:-------:|:-------:|:-------:|
+    |negative       | 0.98    | 0.99    | 0.99    | 30412   |
+    |    positive         |  0.76   |   0.56  |    0.65 | 1503    |
+    |**accuracy**|         |         | 0.97    | 31915   |
+    |**macro avg**|    0.87 |   0.78  |    0.82 |   31915 |
+    |**weighted avg**|    0.97 |   0.97  |    0.97 |   31915 |
+
+
+    --------
+
+
+    |**Identity Hate**      |precision    |recall  |f1-score   |support|
+    |:----------:|:-------:|:-------:|:-------:|:-------:|
+    | negative     | 0.99    | 1.00    | 1.00    | 31638   |
+    |  positive      |  0.60   |   0.26  |    0.36 | 277    |
+    |**accuracy**|         |         | 0.99    | 31915   |
+    |**macro avg**|    0.79 |   0.63  |    0.68 |   31915 |
+    |**weighted avg**|    0.99 |   0.99  |    0.99 |   31915 |
+
     """
     # clean text to remove characters and metadata that may interfere with accuracy of model
     text = clean_text(text)
