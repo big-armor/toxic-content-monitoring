@@ -4,6 +4,7 @@ Main
 import re
 import string
 from fastapi import FastAPI
+from fastapi.openapi.utils import get_openapi
 import sklearn
 from sklearn.externals import joblib
 from pydantic import BaseModel
@@ -42,15 +43,22 @@ async def predict(data: Data):
 
 
     The model is used to determine if the text contains toxic or offensive content.
-    The possible labels are toxic, severe toxic, obscene, threat, insult, and identity
-    hate. If no toxic or obscene content is detected the result will be, "No toxic or
-    offensive content detected."
+    
+    The possible labels are:
+    - toxic
+    - severe 
+    - toxic 
+    - obscene 
+    - threat 
+    - insult 
+    - identity hate
+    - No toxic or offensive content detected
 
     The API returns the original text, any classifications that apply, and the predicted
     probability of the labels given.
 
     The current model is for testing purposes only, and will be replaced by a more robust natural language processing
-    model that has a higher positive recall score for each class.Recall demonstrates how effectively a model identifies
+    model that has a higher positive recall score for each class. Recall demonstrates how effectively a model identifies
     true positives, or in this case, toxicity. A low recall score would indicate a substantial amount of toxic content
     is classified as non-toxic. Next versions of the model will work to minimize false negatives to ensure potentially
     dangerous content is not missed.
@@ -78,58 +86,6 @@ async def predict(data: Data):
     prediction = model.predict(text).tolist()[0]
 
     # identify labels to process predictions
-    labels = ["toxic", "severe toxic", "obscene", "threat", "insult", "identity hate"]
-
-    # process predictions to match labels
-    results = [label for i, label in enumerate(labels) if prediction[i]]
-
-    # get prediction probabalities for each possible label
-    pred_probs = model.predict_proba(text).tolist()[0]
-
-    # get prediction probabilities just for labels that apply
-    probabilty = [round(pred_prob, 2) for i, pred_prob in enumerate(pred_probs) if prediction[i]]
-
-    # for text that is not labeled provide a result to indicate no class identification
-    if len(results) == 0:
-        results = ["No toxic or offensive content detected"]
-
-    # return results
-    return {"text": text, "prediction": results, "probability": probabilty}
-
-@app.post("/classify")
-async def classify(data: Data):
-    """
-    This is the same as the predict method, with some formatting differences.
-    New output will be in the following format:
-
-    {
-    "text": "stupid you're the worst",
-    "results": [
-    {
-      "prediction": "toxic",
-      "probability": 1
-    },
-    {
-      "prediction": "insult",
-      "probability": 0.92}]}
-     Recall is being used as an accuracy metric and the scores below reflect the percentage
-     of positively identied instances of these classes.
-    """
-    data_dict = data.dict()
-
-    # clean text to remove characters and metadata that may interfere with accuracy of model
-    text = clean_text(data.text)
-
-    # model requires text be put into a list to function
-    text = [text]
-
-    # FORMATTING CHANGE: removes string from array for output
-    display_text = " ".join(str(i) for i in text)
-
-    # use unpickled model to make prediction
-    prediction = model.predict(text).tolist()[0]
-
-    # identify labels to process predictions
     labels = ['toxic', 'severe toxic', 'obscene', 'threat', 'insult', 'identity_hate']
 
     # process predictions to match labels
@@ -149,7 +105,7 @@ async def classify(data: Data):
         display_results = ["No toxic or offensive content detected"]
 
     # return results
-    return {"text": display_text, "results": display_results}
+    return {"text": text[0], "results": display_results}
 
 
 def clean_text(x):
@@ -179,3 +135,24 @@ def clean_text(x):
     x = "".join(list(filter(lambda c: c in printable, x)))
 
     return x
+
+# Customize documentation
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+    openapi_schema = get_openapi(
+        title="Harm Detection API",
+        version="1.0.6",
+        description="This API is used to detect toxicity of varying degrees in text. "\
+                    "To read the documentation for post request click the **POST** button. "\
+                    "Clicking the **Try it out** button will allow you to test requests."  ,
+        routes=app.routes,
+    )
+    openapi_schema["info"]["x-logo"] = {
+        "url": "https://fastapi.tiangolo.com/img/logo-margin/logo-teal.png"
+    }
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
+
+
+app.openapi = custom_openapi
