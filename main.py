@@ -7,19 +7,20 @@ from pydantic import BaseModel
 import torch
 from torch.autograd import Variable
 from torch.nn.utils.rnn import pad_sequence
+
 from model import ToxicClassifierModel, vectors
 from preprocessor import normalize_comment, clean_text
 
 
-
+# load model
 model = ToxicClassifierModel()
 model.load_state_dict(torch.load("data/TCM_2.pt"))
 model.eval()
 
 
-
 app = FastAPI()
 
+# makes request body rather than parameter
 class Data(BaseModel):
     text: str
 
@@ -27,8 +28,10 @@ class Data(BaseModel):
 @app.post("/predict/")
 async def predict(data: Data):
     """
-    This API accepts string based requests and cleans the text before running it through the prediction model.
+    This API accepts string based requests and preprocesses the text before
+    running it through the predictive model.
 
+    **Preprocessing**
     The following are removed:
     - Newline characters
     - Return characters
@@ -37,6 +40,14 @@ async def predict(data: Data):
     - IP addresses and user IDs
     - Non-printable characters e.g. unicode
 
+    Words that are disguised using characters such as * or @ are replaced with
+    letters and common astericks words are replaced with coordinating word.
+
+    The API also preprocesses text so that if toxic words are mixed in with
+    non-toxic content, it will split the text before and after so the toxic words
+    are identified.
+
+    **Making Requests**
     Request URL:
     https://fast-api-test2.appspot.com/predict/
 
@@ -44,63 +55,70 @@ async def predict(data: Data):
 
     {"text": "string"}
 
-    **Model**: Term frequency-inverse document frequency(Tfidf) and Logistic Regression
-
-
+    **Model**
     The model is used to determine if the text contains toxic or offensive content.
-    
+
     The possible labels are:
     - toxic
-    - severe 
-    - toxic 
-    - obscene 
-    - threat 
-    - insult 
+    - severe toxic
+    - obscene
+    - threat
+    - insult
     - identity hate
 
-    The API returns the original text, any classifications that apply, and the predicted
-    probability of the labels given.
+    The API returns the cleaned text, all labels, True of False for each label,
+    and the predicted probability of each.
 
-    The current model is for testing purposes only, and will be replaced by a more robust natural language processing
-    model that has a higher positive recall score for each class. Recall demonstrates how effectively a model identifies
-    true positives, or in this case, toxicity. A low recall score would indicate a substantial amount of toxic content
-    is classified as non-toxic. Next versions of the model will work to minimize false negatives to ensure potentially
-    dangerous content is not missed.
+    The current model is a Bi-directional LSTM + GRU neural network made with
+    PyTorch, assuming FastText vectorization. Considerable preprocessing is
+    performed on the text before vectorization. The metrics used in evaluating
+    this model are F1 and ROC-AUC scores.
 
+    F1 score is defined as the harmonic mean between precision and recall on a scale of
+    0 to 1. Recall demonstrates how effectively this model identifies all relevant
+    instances of toxicity. Precision demonstrates how effectively the model returns
+    only these relevant instances.
+
+    The AUC score represents the measure of separability, in this case, distinguishing
+    between toxic and non-toxic content. Also on a scale of 0 to 1, a high AUC score
+    indicates the model successfully classifies toxic vs non-toxic. The ROC represents
+    the probability curve.
+
+    The F1 score for this model is 0.753 and the ROC-AUC score is 0.987
     """
-
-
-    data_dict = data.dict()
 
     # clean text to remove characters and metadata that may interfere with accuracy of model
     text = clean_text(data.text)
 
-    # normalize comment
+    # normalize comment (see preprocessor.py file)
     normalized_words = normalize_comment(text)
 
+    # vectorize the normalized comment using FastText
     var_vectorized_sentence = Variable(torch.nn.utils.rnn.pad_sequence([vectors[normalized_words]]).permute(1,0,2)).float()
 
+    # creates predictions for text on different labels
     output = model(var_vectorized_sentence)
 
+    # removes prediction from tensor object and into a list
     predProb = output.data.numpy().tolist()[0]
 
+    # threshold can be changed in order to increase positive recall scores
     threshold = 0.5
     preds = []
-    
+    # returns true or false for each class based on prediction
     for p in predProb:
         if p >= threshold:
             preds.append(True)
-        else: 
+        else:
             preds.append(False)
-    
 
     # identify labels to process predictions
     labels = ['toxic', 'severe toxic', 'obscene', 'threat', 'insult', 'identity_hate']
 
-    # FORMATTING CHANGE: creates 1 array that contains prediction and probability for each class detected
+    # returns for each class: boolean classification and predicted probability
     display_results = {label:{'prediction':pred, 'probability':round(proba, 5)} for label,pred,proba in zip(labels, preds, predProb)}
 
-    # return results
+    # returns cleaned input text and display_results
     return {"text": text, "results": display_results}
 
 
