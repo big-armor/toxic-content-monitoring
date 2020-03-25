@@ -104,13 +104,9 @@ async def predict(data: Data):
 
     # threshold can be changed in order to increase positive recall scores
     threshold = 0.5
-    preds = []
+
     # returns true or false for each class based on prediction
-    for p in predProb:
-        if p >= threshold:
-            preds.append(True)
-        else:
-            preds.append(False)
+    preds = [ p >= threshold for p in predProb ]
 
     # identify labels to process predictions
     labels = ['toxic', 'severe toxic', 'obscene', 'threat', 'insult', 'identity_hate']

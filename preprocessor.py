@@ -108,8 +108,8 @@ def word_tokenize(sentence):
 
 def normalize_comment(comment):
     """
-    Function that calls split_word and word_tokenize functions on the text so it
-    is in the necessary format to run through the model by creating list of words.
+    Does a variety of normalizing steps, such as separating punctuation and
+    decensoring, before splitting words within a sentence into a list of words.
     """
     comment = unidecode(comment)
     comment = comment[:length_threshold]
