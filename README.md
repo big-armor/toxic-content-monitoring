@@ -1,6 +1,8 @@
 "# toxic-content-monitoring"
 
 API uses FastText: [documentation](https://fastapi.tiangolo.com/tutorial/first-steps/)
+
+
 Deployed through Google's Cloud Services: Google Cloud Storage and App-Engine: [documentation](https://cloud.google.com/appengine/docs)
 
 This API accepts string based requests and preprocesses the text before
