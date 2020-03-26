@@ -1,6 +1,6 @@
 "# toxic-content-monitoring"
 
-API uses FastText: [documentation](https://fastapi.tiangolo.com/tutorial/first-steps/)
+API uses FastAPI: [documentation](https://fastapi.tiangolo.com/tutorial/first-steps/)
 * ```uvicorn main:app``` will run the API locally.
 * going to the url for the api with /docs will allow you to see the documentation
 and test requests.
