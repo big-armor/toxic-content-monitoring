@@ -6,9 +6,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.data
 
-
-from sklearn.model_selection import train_test_split
-
 from torchnlp.word_to_vector import FastText
 
 
