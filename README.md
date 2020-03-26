@@ -1,7 +1,9 @@
 "# toxic-content-monitoring"
 
 API uses FastText: [documentation](https://fastapi.tiangolo.com/tutorial/first-steps/)
-
+* ```uvicorn main:app``` will run the API locally.
+* going to the url for the api with /docs will allow you to see the documentation
+and test requests.
 
 Deployed through Google's Cloud Services: Google Cloud Storage and App-Engine: [documentation](https://cloud.google.com/appengine/docs)
 
