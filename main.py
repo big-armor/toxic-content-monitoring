@@ -7,15 +7,15 @@ from pydantic import BaseModel
 import torch
 from torch.autograd import Variable
 from torch.nn.utils.rnn import pad_sequence
-
 from model import ToxicClassifierModel, vectors
 from preprocessor import normalize_comment, clean_text
 
 
 # load model
 model = ToxicClassifierModel()
-model.load_state_dict(torch.load("data/TCM_2.pt"))
+model.load_state_dict(torch.load("data/TCM_2.pt", map_location=torch.device('cpu')))
 model.eval()
+
 
 
 app = FastAPI()
@@ -48,8 +48,6 @@ async def predict(data: Data):
     are identified.
 
     **Making Requests**
-    Request URL:
-    https://fast-api-test2.appspot.com/predict/
 
     Example Request Body:
 
@@ -124,7 +122,7 @@ def custom_openapi():
         return app.openapi_schema
     openapi_schema = get_openapi(
         title="Harm Detection API",
-        version="1.0.6",
+        version="2.0.4",
         description="This API is used to detect toxicity of varying degrees in text. "\
                     "To read the documentation for post request click the **POST** button. "\
                     "Clicking the **Try it out** button will allow you to test requests."  ,

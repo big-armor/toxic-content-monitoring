@@ -1,3 +1,10 @@
-runtime: python37
-instance_class: F4
-entrypoint: gunicorn main:app -w 4 -k uvicorn.workers.UvicornWorker
+runtime: python
+env: flex
+runtime_config:
+    python_version: 3
+resources:
+  cpu: 12
+  memory_gb: 72
+  disk_size_gb: 60
+instance_class: F4_1G
+entrypoint: gunicorn main:app -w 24 -k uvicorn.workers.UvicornWorker
