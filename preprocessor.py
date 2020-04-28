@@ -49,11 +49,16 @@ toxic_words = set(filter(lambda x: len(x) >= 4, toxic_words))
 printable = set(string.printable)
 
 def clean_text(x):
-    """
-    Function for cleaning text to remove characters, user identification, and
+    """Function for cleaning text to remove characters, user identification, and
     non-printable characters that can interfere with the model's ability to make
     accurate predictions.
-    """
+
+    Arguments:
+        x {string} -- A string
+
+    Returns:
+        string -- Cleaned version of the string
+    """    
     # remove newline characters
     x = re.sub('\\n',' ',x)
 
@@ -78,11 +83,18 @@ def clean_text(x):
     return x
 
 def split_word(word, toxic_words):
-    """
-    Function that accounts for toxic words being hidden within normal text. If
+    """Function that accounts for toxic words being hidden within normal text. If
     any of the toxic words are found, it will split the non-toxic text, exposing
     the toxic word.
-    """
+
+    Arguments:
+        word {string} -- A string containing a toxic word
+        toxic_words {strings} -- List of toxic words
+
+    Returns:
+        string -- The toxic word
+    """    
+    
     if word == "":
         return ""
 
@@ -95,10 +107,15 @@ def split_word(word, toxic_words):
 tknzr = TweetTokenizer(strip_handles=False, reduce_len=True)
 
 def word_tokenize(sentence):
-    """
-    Function that tokenizes text and replaces associated characters with letters
+    """Function that tokenizes text and replaces associated characters with letters
     as well as adds spaces around punctuation.
-    """
+
+    Arguments:
+        sentence {string} -- A string
+
+    Returns:
+        List of strings -- Each component of the sentence as its own string
+    """ 
     sentence = sentence.replace("$", "s")
     sentence = sentence.replace("@", "a")
     sentence = sentence.replace("!", " ! ")
@@ -107,10 +124,15 @@ def word_tokenize(sentence):
     return tknzr.tokenize(sentence)
 
 def normalize_comment(comment):
-    """
-    Does a variety of normalizing steps, such as separating punctuation and
+    """Does a variety of normalizing steps, such as separating punctuation and
     decensoring, before splitting words within a sentence into a list of words.
-    """
+
+    Arguments:
+        comment {string} -- A string
+
+    Returns:
+        string -- cleaned version of string (helps reveal toxic words)
+    """    
     comment = unidecode(comment)
     comment = comment[:length_threshold]
 
