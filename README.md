@@ -22,7 +22,7 @@ Words that are disguised using characters such as * or @ are replaced with lette
 
   {"text": "I am an example string"}
 
-  **Model**
+**Model**
 
   The model is used to determine if the text contains toxic or offensive content.
 
@@ -43,3 +43,11 @@ Words that are disguised using characters such as * or @ are replaced with lette
   The AUC score represents the measure of separability, in this case, distinguishing between toxic and non-toxic content. Also on a scale of 0 to 1, a high AUC score indicates the model successfully classifies toxic vs non-toxic. The ROC represents the probability curve.
 
   The F1 score for this model is 0.753 and the ROC-AUC score is 0.987
+
+**Deploy**
+
+1) Activate a cloud shell
+2) Clone the API repository
+3) Set current working directory to API
+4) Create app on Google Cloud Platform(gcloud app create)
+5) Deploy API to App Engine (gcloud app deploy app.yaml)
