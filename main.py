@@ -107,7 +107,7 @@ async def predict(data: Data):
     preds = [ p >= threshold for p in predProb ]
 
     # identify labels to process predictions
-    labels = ['toxic', 'severe toxic', 'obscene', 'threat', 'insult', 'identity_hate']
+    labels = ['toxic', 'severe_toxic', 'obscene', 'threat', 'insult', 'identity_hate']
 
     # returns for each class: boolean classification and predicted probability
     display_results = {label:{'prediction':pred, 'probability':round(proba, 5)} for label,pred,proba in zip(labels, preds, predProb)}
@@ -121,8 +121,8 @@ def custom_openapi():
     if app.openapi_schema:
         return app.openapi_schema
     openapi_schema = get_openapi(
-        title="Harm Detection API",
-        version="2.0.4",
+        title="Toxicity Classification API",
+        version="2.0.5",
         description="This API is used to detect toxicity of varying degrees in text. "\
                     "To read the documentation for post request click the **POST** button. "\
                     "Clicking the **Try it out** button will allow you to test requests."  ,
