@@ -44,10 +44,26 @@ Words that are disguised using characters such as * or @ are replaced with lette
 
   The F1 score for this model is 0.753 and the ROC-AUC score is 0.987
 
-**Deploy**
+**Deployment**
 
-1) Activate a cloud shell
-2) Clone the API repository
-3) Set current working directory to API
-4) Create app on Google Cloud Platform(gcloud app create)
-5) Deploy API to App Engine (gcloud app deploy app.yaml)
+The following deployment instructions are for tht Google Cloud Shell:
+
+1) Create a VM instance keeping in mind the amount of Memory your model will need(Make sure to allow http/https traffic)
+
+2) Connect to the instance you created sby clicking the ssh button
+
+3) run command:gcloud init to specifiy username and project
+
+4) Clone the repository in the cloud shell
+
+5) Change directory to the repository
+
+6) Create a virtual environment(venv)
+
+7) Connect to the virtual environment
+
+8) Install Dependencies
+
+9) Deploy using code:uvicorn main:app --host 0.0.0.0
+
+10) Visit the api: http://YOUR-EXTERNAL-IP-ADDRESS:8000 (Your external IP address can be found in the console when navigating to the VM instance tab)
