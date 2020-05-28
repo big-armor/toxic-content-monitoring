@@ -46,11 +46,11 @@ Words that are disguised using characters such as * or @ are replaced with lette
 
 **Deployment**
 
-The following deployment instructions are for tht Google Cloud Shell:
+The following deployment instructions are for Google Cloud:
 
 1) Create a VM instance keeping in mind the amount of Memory your model will need(Make sure to allow http/https traffic)
 
-2) Connect to the instance you created sby clicking the ssh button
+2) Connect to the instance you created by clicking the ssh button
 
 3) run command:gcloud init to specifiy username and project
 
