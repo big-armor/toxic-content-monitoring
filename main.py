@@ -3,6 +3,7 @@ Main
 """
 from fastapi import FastAPI
 from fastapi.openapi.utils import get_openapi
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import torch
 from torch.autograd import Variable
@@ -19,6 +20,17 @@ model.eval()
 
 
 app = FastAPI()
+
+origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 # makes request body rather than parameter
 class Data(BaseModel):
@@ -96,7 +108,7 @@ async def predict(data: Data):
 
     # creates predictions for text on different labels
     output = model(var_vectorized_sentence)
-
+    
     # removes prediction from tensor object and into a list
     predProb = output.data.numpy().tolist()[0]
 
